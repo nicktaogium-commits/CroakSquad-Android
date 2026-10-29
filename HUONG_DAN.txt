@@ -1,0 +1,13 @@
+CROAK SQUAD V17 - SERVER ONLY
+
+1. Copy folder nay vao VPS Windows.
+2. Cai Python Windows neu VPS chua co Python. Khong can pygame, Kivy hay PyCharm.
+3. Chay start_server_vps.bat (hoac py server.py).
+4. Mo TCP 5056 trong Windows Firewall va firewall cua nha cung cap VPS.
+   Chay PowerShell voi quyen Administrator:
+   New-NetFirewallRule -DisplayName "Croak Squad TCP 5056" -Direction Inbound -Protocol TCP -LocalPort 5056 -Action Allow
+5. Khi thay Croak Squad server running on port 5056, client ket noi theo IP cong khai cua VPS: 103.78.2.25; port 5056.
+6. Neu muon tao EXE, chay BUILD_SERVER_EXE.bat tren Windows co Python. File o dist\CroakSquad_Server.exe.
+
+Luu y: Port RDP 12639 khac voi port game 5056.
+Doi mat khau Administrator VPS da chia se.
