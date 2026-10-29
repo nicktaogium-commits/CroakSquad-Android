@@ -9,18 +9,39 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Lay ma nguon
+      - name: Checkout project
         uses: actions/checkout@v4
 
-      - name: Tao APK
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install missing Android Build Tools
+        run: |
+          SDK_PATH="$HOME/.buildozer/android/platform/android-sdk"
+          mkdir -p "$SDK_PATH"
+          sdkmanager --sdk_root="$SDK_PATH" \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
+
+          test -f "$SDK_PATH/build-tools/35.0.0/aidl"
+          echo "AIDL installed successfully"
+
+      - name: Build APK
         uses: digreatbrian/buildozer-action@v2
         with:
           python-version: '3.11'
           buildozer-cmd: buildozer -v android debug
 
-      - name: Tai APK ve GitHub
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: CroakSquad-Android-APK
-          path: ./bin/*.apk
+          path: bin/*.apk
           if-no-files-found: error
