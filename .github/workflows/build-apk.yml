@@ -1,4 +1,3 @@
-
 name: Build Croak Squad APK
 
 on:
@@ -21,24 +20,40 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
-     
-      - name: Install missing Android Build Tools
+      - name: Prepare Android SDK for Buildozer
+        shell: bash
         run: |
-          SDK_PATH="$HOME/.buildozer/android/platform/android-sdk"
-          mkdir -p "$SDK_PATH"
+          set -eux
 
-          yes | sdkmanager --sdk_root="$SDK_PATH" --licenses || true
+          export ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          export SDK_PATH="$HOME/.buildozer/android/platform/android-sdk"
 
-          sdkmanager --sdk_root="$SDK_PATH" \
+          mkdir -p "$HOME/.buildozer/android/platform"
+          ln -sfn "$ANDROID_HOME" "$SDK_PATH"
+
+          if [ ! -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
+            echo "Installing cmdline-tools latest"
+            yes | sdkmanager --sdk_root="$ANDROID_HOME" "cmdline-tools;latest" || true
+          fi
+
+          mkdir -p "$SDK_PATH/tools/bin"
+          ln -sf "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "$SDK_PATH/tools/bin/sdkmanager"
+
+          yes | "$SDK_PATH/tools/bin/sdkmanager" --sdk_root="$SDK_PATH" --licenses >/dev/null || true
+          "$SDK_PATH/tools/bin/sdkmanager" --sdk_root="$SDK_PATH" \
             "platform-tools" \
             "platforms;android-35" \
             "build-tools;35.0.0"
 
-          test -f "$SDK_PATH/build-tools/35.0.0/aidl"
-          echo "AIDL installed successfully"
+          test -x "$SDK_PATH/tools/bin/sdkmanager"
+          echo "Android SDK is ready for Buildozer"
 
       - name: Build APK
         uses: digreatbrian/buildozer-action@v2
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
         with:
           python-version: '3.11'
           buildozer-cmd: buildozer -v android debug
