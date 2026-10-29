@@ -21,10 +21,14 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
 
+     
       - name: Install missing Android Build Tools
         run: |
           SDK_PATH="$HOME/.buildozer/android/platform/android-sdk"
           mkdir -p "$SDK_PATH"
+
+          yes | sdkmanager --sdk_root="$SDK_PATH" --licenses || true
+
           sdkmanager --sdk_root="$SDK_PATH" \
             "platform-tools" \
             "platforms;android-35" \
